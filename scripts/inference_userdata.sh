@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 
 # Log everything for debugging
 exec > /var/log/inference-userdata.log 2>&1

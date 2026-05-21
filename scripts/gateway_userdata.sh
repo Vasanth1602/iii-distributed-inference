@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 
 # Log everything for debugging
 exec > /var/log/gateway-userdata.log 2>&1
@@ -9,20 +9,31 @@ echo "=== Gateway userdata started: $(date) ==="
 # 1. System packages
 ##############################################################################
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
-apt-get install -y curl git nginx nodejs npm
 
-# Node.js 20 LTS
+apt-get update -y
+
+# Base packages only
+apt-get install -y curl git nginx jq
+
+# Install Node.js 20 from NodeSource
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
 apt-get install -y nodejs
 
 ##############################################################################
 # 2. Install iii CLI
 ##############################################################################
+
+# cloud-init non-interactive shells may not define HOME
+export HOME=/root
+
 curl -fsSL https://install.iii.dev/iii/main/install.sh | sh
+
 export PATH="$HOME/.local/bin:$PATH"
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> /root/.bashrc
-iii --version
+
+# Use absolute path for reliability
+/root/.local/bin/iii --version
 
 ##############################################################################
 # 3. Clone your repo
