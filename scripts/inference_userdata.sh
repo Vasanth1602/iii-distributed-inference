@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 # Log everything for debugging
-exec > /var/log/inference-userdata.log 2>&1
+exec > >(tee /var/log/inference-userdata.log | logger -t userdata ) 2>&1
 echo "=== Inference worker userdata started: $(date) ==="
 
 GATEWAY_IP="${gateway_private_ip}"
@@ -12,27 +12,48 @@ GATEWAY_IP="${gateway_private_ip}"
 ##############################################################################
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y curl git python3 python3-pip python3-venv netcat-openbsd
+apt-get install -y curl git jq python3 python3-pip python3-venv netcat-openbsd
 
 ##############################################################################
-# 2. Clone your repo
+# Extra swap for memory-constrained free-tier instance
+##############################################################################
+fallocate -l 4G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+##############################################################################
+# 2. Install iii CLI
+##############################################################################
+
+export HOME=/root
+
+curl -fsSL https://install.iii.dev/iii/main/install.sh | sh
+
+export PATH="$HOME/.local/bin:$PATH"
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> /root/.bashrc
+
+/root/.local/bin/iii --version
+
+##############################################################################
+# 3. Clone your repo
 ##############################################################################
 git clone ${github_repo} /opt/iii-inference
 cd /opt/iii-inference
 
 ##############################################################################
-# 3. Python virtual environment + dependencies
+# 4. Python virtual environment + dependencies
 ##############################################################################
 python3 -m venv /opt/iii-venv
 source /opt/iii-venv/bin/activate
 
 pip install --upgrade pip
-pip install -r /opt/iii-inference/workers/inference-worker/requirements.txt
+pip install --no-cache-dir -r /opt/iii-inference/workers/inference-worker/requirements.txt
 
 deactivate
 
 ##############################################################################
-# 4. Wait for iii engine on gateway to be ready
+# 5. Wait for iii engine on gateway to be ready
 #    Without this the worker starts before the engine and fails silently
 ##############################################################################
 echo "=== Waiting for iii engine at $GATEWAY_IP:49134 ==="
@@ -43,7 +64,7 @@ done
 echo "=== Engine is ready ==="
 
 ##############################################################################
-# 5. systemd — inference worker
+# 6. systemd — inference worker
 ##############################################################################
 cat > /etc/systemd/system/inference-worker.service << EOF
 [Unit]
@@ -69,7 +90,7 @@ WantedBy=multi-user.target
 EOF
 
 ##############################################################################
-# 6. Start inference worker
+# 7. Start inference worker
 #    Model downloads on first start — takes 3-5 mins
 ##############################################################################
 systemctl daemon-reload
@@ -77,9 +98,9 @@ systemctl enable inference-worker
 systemctl start  inference-worker
 
 ##############################################################################
-# 7. Health check
+# 8. Health check
 ##############################################################################
-sleep 10
+sleep 30
 systemctl is-active inference-worker && \
   echo "=== Inference worker running ===" || \
   echo "=== WARNING: inference worker not active - check logs ==="
