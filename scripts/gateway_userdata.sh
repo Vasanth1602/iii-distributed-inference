@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 # Log everything for debugging
-exec > /var/log/gateway-userdata.log 2>&1
+exec > >(tee /var/log/gateway-userdata.log | logger -t userdata) 2>&1
 echo "=== Gateway userdata started: $(date) ==="
 
 ##############################################################################

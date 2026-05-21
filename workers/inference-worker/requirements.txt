@@ -1,7 +1,17 @@
+# iii-sdk==0.11.0
+# watchfiles
+# transformers==4.51.3
+# torch
+# gguf==0.10.0
+# accelerate
+# sentencepiece
+
 iii-sdk==0.11.0
 watchfiles
-transformers==4.51.3
-torch
+transformers==4.50.0
 gguf==0.10.0
 accelerate
 sentencepiece
+numpy==1.26.4
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.1+cpu

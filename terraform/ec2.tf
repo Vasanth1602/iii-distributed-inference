@@ -67,5 +67,8 @@ resource "aws_instance" "inference_worker" {
   }
 
   # Gateway must exist before inference worker starts
-  depends_on = [aws_instance.gateway]
+  depends_on = [
+    aws_instance.gateway,
+    aws_route_table_association.private
+  ]
 }
