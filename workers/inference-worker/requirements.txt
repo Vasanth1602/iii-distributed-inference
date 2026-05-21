@@ -4,3 +4,4 @@ transformers==4.51.3
 torch
 gguf==0.10.0
 accelerate
+sentencepiece
