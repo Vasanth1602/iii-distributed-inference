@@ -1,0 +1,19 @@
+[Unit]
+Description=iii Engine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/iii-inference
+ExecStart=/root/.local/bin/iii --config config.yaml
+Restart=on-failure
+RestartSec=5
+Environment=HOME=/root
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=iii-engine
+
+[Install]
+WantedBy=multi-user.target

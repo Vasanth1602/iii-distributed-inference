@@ -1,0 +1,20 @@
+[Unit]
+Description=iii Caller Worker (TypeScript)
+After=iii-engine.service
+Requires=iii-engine.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/iii-inference/workers/caller-worker
+Environment=III_URL=ws://localhost:49134
+Environment=HOME=/root
+ExecStart=/usr/bin/npx tsx src/worker.ts
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=caller-worker
+
+[Install]
+WantedBy=multi-user.target

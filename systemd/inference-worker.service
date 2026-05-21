@@ -1,0 +1,20 @@
+[Unit]
+Description=iii Inference Worker (Python)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/iii-inference/workers/inference-worker
+Environment=III_URL=ws://10.0.1.10:49134
+Environment=HOME=/root
+ExecStart=/opt/iii-venv/bin/python inference_worker.py
+Restart=on-failure
+RestartSec=15
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=inference-worker
+
+[Install]
+WantedBy=multi-user.target
