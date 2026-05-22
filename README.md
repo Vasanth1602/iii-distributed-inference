@@ -267,11 +267,11 @@ Removes all 17 resources. NAT Gateway charges ~$0.045/hr so destroy when done.
 
 | Port | Gateway VM | Inference VM |
 |---|---|---|
-| 80 | ✅ Open to internet | ❌ Not applicable |
-| 443 | ✅ Open to internet | ❌ Not applicable |
-| 49134 (iii engine WS) | ✅ From private subnet only | ❌ No inbound |
-| 3111 (iii HTTP) | ❌ Internal only — nginx handles this | ❌ No inbound |
-| 22 (SSH) | ❌ Not open — SSM used instead | ❌ Not open |
+| 80 | Open to internet | Not applicable |
+| 443 | Open to internet | Not applicable |
+| 49134 (iii engine WS) | From private subnet only | No inbound |
+| 3111 (iii HTTP) | Internal only — nginx handles this | No inbound |
+| 22 (SSH) | Not open — SSM used instead | Not open |
 
 Workers are completely unreachable from the public internet. The inference-worker-vm has zero inbound rules — it only makes outbound connections to the engine on the gateway.
 
