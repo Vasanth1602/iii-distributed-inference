@@ -11,6 +11,7 @@ iii.registerFunction(
     const result = await iii.trigger({
       function_id: 'inference::run_inference',
       payload,
+      timeout: 120000, // CPU inference on t3.micro takes 60-90s; default 30s timeout causes silent failure
     });
 
     return {
@@ -28,6 +29,7 @@ iii.registerFunction(
     const result = await iii.trigger({
       function_id: 'inference::get_response',
       payload: payload.body,
+      timeout: 120000, // allows full chain: HTTP trigger → get_response → run_inference, all within 120s
     });
     logger.info("Running http inference...")
     return {

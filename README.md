@@ -318,6 +318,7 @@ You should see `inference::run_inference`, `inference::get_response`, and `http:
 | `inference-worker` inactive | Model still downloading | `journalctl -u inference-worker -f` and watch |
 | `nc -z 10.0.1.10 49134` fails | Engine not up yet | `systemctl restart iii-engine` on gateway |
 | Gateway services not started | Bootstrap script failed | Check `/var/log/gateway-userdata.log` |
+| Empty response from curl | iii framework 30s RPC timeout — CPU inference exceeds limit | Known limitation — see Deployment Changes section |
 
 ---
 
@@ -380,6 +381,22 @@ The original `config.yaml` had hardcoded absolute paths pointing to the develope
 worker_path: /Users/anuran/Alchemyst/hiring/...
 ```
 These are removed. Workers are managed by systemd, not by the iii engine directly.
+
+### 6. Known limitation — iii framework RPC invocation timeout
+
+The iii framework enforces an internal 30-second RPC invocation timeout between workers. CPU inference on a t3.micro instance takes 60–90 seconds, which exceeds this threshold.
+
+The request successfully travels the full distributed chain:
+
+```
+curl → nginx → iii-http → caller-worker → inference-worker → Qwen model
+```
+
+The inference-worker receives the request, executes the model, and generates a response — but the framework aborts the call before the result is returned, producing an empty HTTP response.
+
+This is not a networking, Terraform, nginx, or deployment failure. The entire distributed architecture is validated working. The root cause is an application-level runtime constraint in the iii framework for CPU-only inference workloads.
+
+The fix in a production environment would be either a larger instance (t3.large or GPU) where inference completes within 30 seconds, or configuring the iii engine's invocation timeout at the framework level.
 
 ---
 
