@@ -29,7 +29,7 @@ Deploys the [iii quickstart](https://iii.dev/docs/quickstart) across two private
               │  Private Subnet 10.0.2.0/24     │  │ ws://10.0.1.10:49134
               │  ┌──────────────────────────┐   │  │
               │  │  inference-worker-vm     │◄──┼──┘
-              │  │  (t3.large)              │   │
+              │  │  (t3.micro)              │   │
               │  │  No public IP            │   │
               │  │  Python + Qwen model     │   │
               │  └──────────┬───────────────┘   │
