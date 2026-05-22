@@ -1,0 +1,44 @@
+# ── Deployment Configuration ───────────────────────────────────────────────────
+# Copy this file to terraform.tfvars and fill in your values.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# terraform.tfvars is gitignored — never commit it.
+# This example file IS committed as a reference template.
+
+# AWS region to deploy into
+aws_region = "ap-south-1"
+
+# Prefix used to name all AWS resources (VPC, EC2, SGs, IAM, etc.)
+project_name = "iii-inference"
+
+# Your public GitHub repo URL — cloned onto both VMs during bootstrap
+github_repo = "https://github.com/Vasanth1602/iii-distributed-inference.git"   # replace Vasanth1602 with your username if forked
+
+# ── Networking ─────────────────────────────────────────────────────────────────
+# These defaults work out of the box — only change if they conflict with
+# an existing VPC in your account.
+
+vpc_cidr            = "10.0.0.0/16"
+public_subnet_cidr  = "10.0.1.0/24"   # gateway VM lives here
+private_subnet_cidr = "10.0.2.0/24"   # inference worker lives here
+
+# Fixed private IP for the gateway VM.
+# The inference worker uses this to connect to the iii engine over WebSocket.
+# Must be within public_subnet_cidr.
+gateway_private_ip = "10.0.1.10"
+
+# ── Compute ────────────────────────────────────────────────────────────────────
+# t3.small  — gateway  (nginx + iii engine + caller-worker, ~2GB RAM needed)
+# t3.micro  — inference worker (1GB RAM + 4GB swap allocated by bootstrap script)
+# t3.large  — inference worker preferred if your account allows it (no swap needed)
+
+gateway_instance_type   = "t3.small"
+inference_instance_type = "t3.micro"
+
+# ── Storage ────────────────────────────────────────────────────────────────────
+# 20GB is sufficient for the OS + model (~500MB GGUF) + Python venv + Node deps.
+# Increase inference_disk_gb if you switch to a larger model.
+
+gateway_disk_gb   = 20
+inference_disk_gb = 20

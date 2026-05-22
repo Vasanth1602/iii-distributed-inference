@@ -19,7 +19,7 @@ resource "aws_security_group" "gateway" {
     from_port   = 49134
     to_port     = 49134
     protocol    = "tcp"
-    cidr_blocks = ["10.0.2.0/24"]
+    cidr_blocks = [var.private_subnet_cidr]
   }
 
   # All outbound allowed

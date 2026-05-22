@@ -14,8 +14,8 @@ logger = Logger()
 # pip install transformers accelerate gguf torch
 
 
-model_id = "ggml-org/gemma-3-270m-GGUF" # "Qwen/Qwen3-0.6B-GGUF"
-gguf_file = "gemma-3-270m-Q8_0.gguf" # "Qwen3-0.6B-Q8_0.gguf"  # Q8 quantized variant
+model_id = "Qwen/Qwen2.5-0.5B-Instruct-GGUF"
+gguf_file = "qwen2.5-0.5b-instruct-q8_0.gguf"
 
 # 2. Load tokenizer and model from the GGUF file
 tokenizer = AutoTokenizer.from_pretrained(model_id, gguf_file=gguf_file)

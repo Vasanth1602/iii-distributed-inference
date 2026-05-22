@@ -17,17 +17,17 @@ data "aws_ami" "ubuntu" {
 # ── Gateway VM ────────────────────────────────────────────────────────────────
 resource "aws_instance" "gateway" {
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t3.small"
+  instance_type               = var.gateway_instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.gateway.id]
   iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
   associate_public_ip_address = true
 
   # Fixed private IP so inference worker always knows where engine is
-  private_ip = "10.0.1.10"
+  private_ip = var.gateway_private_ip
 
   root_block_device {
-    volume_size = 20
+    volume_size = var.gateway_disk_gb
     volume_type = "gp3"
   }
 
@@ -44,7 +44,7 @@ resource "aws_instance" "gateway" {
 # ── Inference Worker VM ───────────────────────────────────────────────────────
 resource "aws_instance" "inference_worker" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
+  instance_type          = var.inference_instance_type
   subnet_id              = aws_subnet.private.id
   vpc_security_group_ids = [aws_security_group.inference.id]
   iam_instance_profile   = aws_iam_instance_profile.ssm_profile.name
@@ -53,13 +53,13 @@ resource "aws_instance" "inference_worker" {
   associate_public_ip_address = false
 
   root_block_device {
-    volume_size = 20
+    volume_size = var.inference_disk_gb
     volume_type = "gp3"
   }
 
   user_data = templatefile("${path.module}/../scripts/inference_userdata.sh", {
     github_repo        = var.github_repo
-    gateway_private_ip = "10.0.1.10"
+    gateway_private_ip = var.gateway_private_ip
   })
 
   tags = {
